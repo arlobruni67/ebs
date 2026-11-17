@@ -1,0 +1,17 @@
+EBS
+
+Copyright (C) 2026 Arlo
+
+This program is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See LICENSE.txt for the full text.
+
+In short: you can use it, change it and share it. If you share it (changed or not),
+you must share the source code too, under the same licence, and keep this notice.
+
+Third-party parts:
+  EBS uses FFmpeg n9.0.2-57-gd838f9f9ae (BtbN FFmpeg-Builds, win64 gpl-shared, 2026-11-12), licensed GPL-3.0. FFmpeg source: https://ffmpeg.org/download.html and https://github.com/BtbN/FFmpeg-Builds (build scripts).

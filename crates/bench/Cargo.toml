@@ -1,0 +1,9 @@
+[package]
+name = "ebs-bench"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ebs-engine = { path = "../engine" }
+serde_json = { workspace = true }
+anyhow.workspace = true

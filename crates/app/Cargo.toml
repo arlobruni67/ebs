@@ -1,0 +1,17 @@
+[package]
+name = "ebs"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "BETTERBS"
+path = "src/main.rs"
+
+[dependencies]
+ebs-engine = { path = "../engine" }
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+windows.workspace = true
+eframe = { version = "0.31", default-features = false, features = ["glow", "default_fonts", "accesskit"] }
+raw-window-handle = "0.6"
