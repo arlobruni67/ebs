@@ -1,4 +1,4 @@
-# EBS
+# BETTERBS
 
 A light screen and game recorder for Windows, written in Rust, that does not drop frames.
 
@@ -12,7 +12,7 @@ A light screen and game recorder for Windows, written in Rust, that does not dro
 ## Download
 
 Get the ready-to-run app from **[Arlo Maker](https://arlobruni67.github.io/arlo-maker/)**:
-unzip it and double-click `EBS.exe`.
+unzip it and double-click `BETTERBS.exe`.
 
 ## Documentation
 
@@ -24,9 +24,9 @@ unzip it and double-click `EBS.exe`.
 | Folder | What it is |
 |---|---|
 | `crates/engine` | capture, GPU compositor, audio, encoders, muxer, recorder, benchmark |
-| `crates/app` | the EBS window (egui) |
+| `crates/app` | the BETTERBS window (egui) |
 | `crates/bench` | `ebs-bench`, a command-line tool for recording and encoder tests |
 
 ## Licence
 
-GPL-3.0-or-later. See [LICENSE.txt](LICENSE.txt) and [NOTICE.txt](NOTICE.txt). EBS uses FFmpeg (GPL-3.0).
+GPL-3.0-or-later. See [LICENSE.txt](LICENSE.txt) and [NOTICE.txt](NOTICE.txt). BETTERBS uses FFmpeg (GPL-3.0).

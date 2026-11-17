@@ -1,6 +1,6 @@
-# Building EBS from source
+# Building BETTERBS from source
 
-EBS is a Cargo workspace (`crates/engine`, `crates/app`, `crates/bench`) for Windows x64.
+BETTERBS is a Cargo workspace (`crates/engine`, `crates/app`, `crates/bench`) for Windows x64.
 
 ## You need
 
@@ -17,7 +17,7 @@ cargo build --release
 
 `crates/engine/build.rs` reads `EBS_FFMPEG_LIB` to find the FFmpeg import libraries.
 
-The app is `target\release\EBS.exe`. Copy the FFmpeg DLLs (`avcodec`, `avformat`, `avutil`, `swresample`,
+The app is `target\release\BETTERBS.exe`. Copy the FFmpeg DLLs (`avcodec`, `avformat`, `avutil`, `swresample`,
 `swscale`, ...) next to it before running.
 
 ## Notes

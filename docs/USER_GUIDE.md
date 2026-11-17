@@ -1,17 +1,17 @@
-# EBS user guide
+# BETTERBS user guide
 
 ## 1. Install and start
 
-1. Download `ebs-windows.zip` from [Arlo Maker](https://arlobruni67.github.io/arlo-maker/).
+1. Download `betterbs-windows.zip` from [Arlo Maker](https://arlobruni67.github.io/arlo-maker/).
 2. Unzip the whole folder anywhere, for example your Desktop.
-3. Double-click **EBS.exe**.
+3. Double-click **BETTERBS.exe**.
 
 You need Windows 10 or 11 (64-bit). An NVIDIA card (NVENC) or AMD card (AMF) records with almost no slowdown;
-without one EBS records on the CPU with x264.
+without one BETTERBS records on the CPU with x264.
 
 ## 2. Your first recording
 
-1. Press **Optimise** in the top bar. EBS records short test clips with each preset and recommends the best one
+1. Press **Optimise** in the top bar. BETTERBS records short test clips with each preset and recommends the best one
    that stays smooth on your PC.
 2. Pick a video mode in the top bar: **YouTube Wide video (16:9)**, **YouTube Short (9:16 vertical)** or
    **Custom resolution**. In Short mode the game fills the tall frame and its left and right edges are cut off.
@@ -74,8 +74,8 @@ Turn on **remux to MP4** to get an MP4 copy when recording stops.
 
 ## 8. Troubleshooting
 
-* **Game Capture shows "Waiting for ..."**: start the game; EBS picks it up by itself.
-* **An encoder is missing**: EBS tests every encoder in a separate process when it starts; ones that fail on your
+* **Game Capture shows "Waiting for ..."**: start the game; BETTERBS picks it up by itself.
+* **An encoder is missing**: BETTERBS tests every encoder in a separate process when it starts; ones that fail on your
   PC are hidden. Use Optimise to pick a working preset.
 * **Black preview**: some apps block capture of their window; use Display Capture instead.
 * Check `%APPDATA%\EBS-rs\ebs.log` for details.
