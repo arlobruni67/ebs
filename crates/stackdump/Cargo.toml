@@ -1,0 +1,9 @@
+[package]
+name = "stackdump"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+windows.workspace = true
+addr2line = { version = "0.24", features = ["loader"] }
+object = "0.36"

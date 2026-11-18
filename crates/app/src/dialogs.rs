@@ -1122,7 +1122,7 @@ impl SettingsState {
         }
         section(ui, "Sync");
         crate::widgets::checkbox(ui, &mut self.d.auto_av_sync, "Automatic A/V sync (delay audio by the measured capture latency)")
-            .on_hover_text("Video reaches the recorder about one frame after it appears on screen; sound arrives sooner. BETTERBS measures this per recording and lines them up.");
+            .on_hover_text("Video reaches the recorder about one frame after it appears on screen; sound arrives sooner. EBS measures this per recording and lines them up.");
         row(ui, "Extra audio offset (ms)", "Manual fine-tune. Positive = audio later, negative = audio earlier. Leave at 0 unless you hear a delay.", |ui| {
             ui.add(egui::TextEdit::singleline(&mut self.offset).desired_width(80.0));
         });

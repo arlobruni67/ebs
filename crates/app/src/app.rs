@@ -219,7 +219,7 @@ impl EbsApp {
             main_focused_last: false,
         };
         if !warnings.is_empty() {
-            app.dialog = Some(Dialog::Message { title: "BETTERBS".into(), message: warnings.join("\n") });
+            app.dialog = Some(Dialog::Message { title: "EBS".into(), message: warnings.join("\n") });
         }
         app.save_scenes();
         app.start_probe(false);
@@ -799,7 +799,7 @@ impl EbsApp {
 
     fn top_bar(&mut self, ui: &mut egui::Ui) {
         ui.horizontal_centered(|ui| {
-            ui.label(RichText::new("BETTERBS").font(egui::FontId::new(14.0, egui::FontFamily::Name("bold".into()))).color(TEXT));
+            ui.label(RichText::new("EBS").font(egui::FontId::new(14.0, egui::FontFamily::Name("bold".into()))).color(TEXT));
             w::vsep(ui);
             let r = egui::menu::menu_custom_button(ui, egui::Button::new(w::label_chevron(&format!("Collection: {}", self.coll.name))), |ui| self.collection_menu(ui));
             if r.inner.is_some() {
@@ -1406,6 +1406,7 @@ impl EbsApp {
 
 impl eframe::App for EbsApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        crate::UI_HEARTBEAT.store(crate::now_ms().max(1), std::sync::atomic::Ordering::Relaxed);
         self.poll_probe();
         self.poll_recording(ctx);
         self.update_stats();
@@ -1418,7 +1419,7 @@ impl eframe::App for EbsApp {
             if self.is_recording() {
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
                 if matches!(self.rec, RecState::Recording(_)) && self.dialog.is_none() {
-                    self.confirm("Recording in progress", "A recording is running. Stop it and close BETTERBS?", "Stop and close", ConfirmAction::StopAndClose);
+                    self.confirm("Recording in progress", "A recording is running. Stop it and close EBS?", "Stop and close", ConfirmAction::StopAndClose);
                 }
             } else if matches!(self.dialog, Some(Dialog::Benchmark(ref b)) if b.running()) {
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);

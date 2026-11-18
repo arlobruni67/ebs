@@ -150,10 +150,13 @@ pub fn fader(ui: &mut Ui, id: egui::Id, value: &mut f32, range: std::ops::RangeI
             r.mark_changed();
         }
     }
-    if r.hovered() || r.has_focus() {
+    // Read focus before ui.input: calling Response methods inside an input closure re-locks the egui
+    // context and deadlocks the UI thread (the app showed "Not Responding" whenever the mouse was over a fader).
+    let focused = r.has_focus();
+    if r.hovered() || focused {
         let step = ui.input(|i| {
             let mut s = i.raw_scroll_delta.y.signum() * if i.raw_scroll_delta.y != 0.0 { 1.0 } else { 0.0 };
-            if r.has_focus() {
+            if focused {
                 if i.key_pressed(egui::Key::ArrowRight) || i.key_pressed(egui::Key::ArrowUp) {
                     s += 1.0;
                 }

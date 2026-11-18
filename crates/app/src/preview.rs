@@ -19,48 +19,97 @@ unsafe extern "system" fn wndproc(h: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> 
     match msg {
         WM_NCHITTEST => LRESULT(HTTRANSPARENT),
         WM_ERASEBKGND => LRESULT(1),
+        WM_DESTROY => {
+            PostQuitMessage(0);
+            LRESULT(0)
+        }
         _ => DefWindowProcW(h, msg, wp, lp),
+    }
+}
+
+/// Waits up to `ms` for cross-thread sent messages and handles only those (no posted input is removed,
+/// so winit's own queue is untouched).
+fn pump_sent_messages(ms: u32) {
+    unsafe {
+        let _ = MsgWaitForMultipleObjects(None, false, ms, QS_SENDMESSAGE);
+        let mut msg = MSG::default();
+        let _ = PeekMessageW(&mut msg, None, 0, 0, PM_NOREMOVE | PM_QS_SENDMESSAGE);
     }
 }
 
 pub struct PreviewWindow {
     pub hwnd: isize,
     placed: Option<(i32, i32, i32, i32, bool)>,
+    thread: Option<std::thread::JoinHandle<()>>,
 }
 
 impl PreviewWindow {
+    /// Creates the child window on its own thread with its own message loop.
+    ///
+    /// The engine's render thread resizes and presents the DXGI swap chain of this window, and DXGI sends
+    /// window messages to the thread that owns the window while doing so. If the owner were the UI thread,
+    /// the render thread would wait for the UI thread while the UI thread waits for an engine lock held by
+    /// the render thread: both freeze and Windows shows "Not Responding". A dedicated, always-pumping owner
+    /// thread breaks that cycle.
     pub fn create(parent: isize) -> anyhow::Result<PreviewWindow> {
         unsafe {
-            let inst = GetModuleHandleW(None)?;
-            let wc = WNDCLASSW {
-                lpfnWndProc: Some(wndproc),
-                hInstance: inst.into(),
-                lpszClassName: w!("EBSPreview"),
-                hCursor: LoadCursorW(None, IDC_ARROW)?,
-                hbrBackground: HBRUSH::default(),
-                ..Default::default()
-            };
-            RegisterClassW(&wc);
             // The parent must not paint over the child (egui redraws the whole window every frame).
             let p = HWND(parent as *mut _);
             let style = GetWindowLongPtrW(p, GWL_STYLE);
             SetWindowLongPtrW(p, GWL_STYLE, style | WS_CLIPCHILDREN.0 as isize);
-            let h = CreateWindowExW(
-                WINDOW_EX_STYLE(0),
-                w!("EBSPreview"),
-                w!(""),
-                WS_CHILD | WS_CLIPSIBLINGS,
-                0,
-                0,
-                16,
-                16,
-                p,
-                None,
-                inst,
-                None,
-            )?;
-            Ok(PreviewWindow { hwnd: h.0 as isize, placed: None })
         }
+        let (tx, rx) = std::sync::mpsc::channel::<anyhow::Result<isize>>();
+        let thread = std::thread::Builder::new().name("preview-window".into()).spawn(move || unsafe {
+            let made = (|| -> anyhow::Result<HWND> {
+                let inst = GetModuleHandleW(None)?;
+                let wc = WNDCLASSW {
+                    lpfnWndProc: Some(wndproc),
+                    hInstance: inst.into(),
+                    lpszClassName: w!("EBSPreview"),
+                    hCursor: LoadCursorW(None, IDC_ARROW)?,
+                    hbrBackground: HBRUSH::default(),
+                    ..Default::default()
+                };
+                RegisterClassW(&wc);
+                Ok(CreateWindowExW(
+                    WS_EX_NOPARENTNOTIFY,
+                    w!("EBSPreview"),
+                    w!(""),
+                    WS_CHILD | WS_CLIPSIBLINGS,
+                    0,
+                    0,
+                    16,
+                    16,
+                    HWND(parent as *mut _),
+                    None,
+                    inst,
+                    None,
+                )?)
+            })();
+            match made {
+                Ok(h) => {
+                    let _ = tx.send(Ok(h.0 as isize));
+                    let mut msg = MSG::default();
+                    while GetMessageW(&mut msg, None, 0, 0).0 > 0 {
+                        let _ = TranslateMessage(&msg);
+                        DispatchMessageW(&msg);
+                    }
+                }
+                Err(e) => {
+                    let _ = tx.send(Err(e));
+                }
+            }
+        })?;
+        // Creating a child of the UI thread's window sends messages to the UI thread, so keep handling
+        // sent messages while waiting (a plain blocking recv here deadlocks).
+        let hwnd = loop {
+            match rx.try_recv() {
+                Ok(r) => break r?,
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => anyhow::bail!("preview thread ended"),
+                Err(std::sync::mpsc::TryRecvError::Empty) => pump_sent_messages(10),
+            }
+        };
+        Ok(PreviewWindow { hwnd, placed: None, thread: Some(thread) })
     }
 
     /// Positions the child in physical pixels; hidden when `visible` is false (e.g. while a popup is open
@@ -73,7 +122,9 @@ impl PreviewWindow {
         let resized = self.placed.map(|p| (p.2, p.3) != (want.2, want.3)).unwrap_or(true);
         unsafe {
             let hwnd = HWND(self.hwnd as *mut _);
-            let _ = SetWindowPos(hwnd, None, x, y, want.2, want.3, SWP_NOZORDER | SWP_NOACTIVATE | if visible { SWP_SHOWWINDOW } else { SWP_HIDEWINDOW });
+            // Asynchronous: never wait on the preview thread from the UI thread.
+            let flags = SWP_NOZORDER | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS | if visible { SWP_SHOWWINDOW } else { SWP_HIDEWINDOW };
+            let _ = SetWindowPos(hwnd, None, x, y, want.2, want.3, flags);
         }
         self.placed = Some(want);
         resized
@@ -83,7 +134,17 @@ impl PreviewWindow {
 impl Drop for PreviewWindow {
     fn drop(&mut self) {
         unsafe {
-            let _ = DestroyWindow(HWND(self.hwnd as *mut _));
+            // WM_CLOSE -> DestroyWindow on the owner thread -> WM_DESTROY -> quit its loop.
+            let _ = PostMessageW(HWND(self.hwnd as *mut _), WM_CLOSE, WPARAM(0), LPARAM(0));
+        }
+        if let Some(t) = self.thread.take() {
+            let start = std::time::Instant::now();
+            while !t.is_finished() && start.elapsed() < std::time::Duration::from_secs(2) {
+                pump_sent_messages(10);
+            }
+            if t.is_finished() {
+                let _ = t.join();
+            }
         }
     }
 }

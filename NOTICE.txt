@@ -1,4 +1,4 @@
-BETTERBS
+EBS
 
 Copyright (C) 2026 Arlo
 
@@ -14,4 +14,4 @@ In short: you can use it, change it and share it. If you share it (changed or no
 you must share the source code too, under the same licence, and keep this notice.
 
 Third-party parts:
-  BETTERBS uses FFmpeg n9.0.2-57-gd838f9f9ae (BtbN FFmpeg-Builds, win64 gpl-shared, 2026-11-12), licensed GPL-3.0. FFmpeg source: https://ffmpeg.org/download.html and https://github.com/BtbN/FFmpeg-Builds (build scripts).
+  EBS uses FFmpeg n9.0.2-57-gd838f9f9ae (BtbN FFmpeg-Builds, win64 gpl-shared, 2026-11-12), licensed GPL-3.0. FFmpeg source: https://ffmpeg.org/download.html and https://github.com/BtbN/FFmpeg-Builds (build scripts).

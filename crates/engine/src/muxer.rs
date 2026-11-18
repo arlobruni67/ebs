@@ -117,7 +117,7 @@ impl Muxer {
 
     pub fn start(&mut self) -> Result<MuxWriter> {
         unsafe {
-            let (k, v) = (cstr("encoder"), cstr("BETTERBS"));
+            let (k, v) = (cstr("encoder"), cstr("EBS"));
             av_dict_set(field(self.fmt, AVFormatContext_metadata), k.as_ptr(), v.as_ptr(), 0);
             let p = path_c(&self.path);
             check(avio_open(field(self.fmt, AVFormatContext_pb), p.as_ptr(), AVIO_FLAG_WRITE), format!("open {}", self.path.display()))?;
